@@ -1,0 +1,6 @@
+[package]
+name = "ternary-matrix"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "Matrix operations optimized for ternary values with compact 2-bit storage"
