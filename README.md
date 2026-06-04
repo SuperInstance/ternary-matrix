@@ -104,6 +104,20 @@ let scaled = a.scale(-1);
 3. **Game theory** — Represent and analyze payoff matrices with ternary outcomes
 4. **Combinatorial optimization** — Compact storage for large-scale ternary constraint matrices
 
+## Known Limitations
+
+- **Determinant uses recursive cofactor expansion (O(n!))**: `determinant()` computes the determinant via Laplace expansion, which has factorial time complexity. For matrices larger than ~8×8, this becomes impractically slow. No LU-decomposition fallback exists.
+
+- **GF(3) inverse only works for small matrices**: `inverse_gf3()` uses augmented-matrix Gauss-Jordan elimination, which is O(n³) — acceptable for moderate sizes. However, the implementation stores intermediate values as `i32` integers, which can overflow for matrices larger than ~50×50 due to accumulation during row operations.
+
+- **Power iteration finds only the dominant eigenvalue**: `dominant_eigenvalue()` converges on the eigenvalue with largest absolute magnitude. If you need all eigenvalues, you must deflate and re-run manually. For ternary matrices with equal-magnitude eigenvalues, convergence stalls.
+
+- **2-bit encoding wastes the `11` pattern**: The encoding maps −1→`00`, 0→`01`, +1→`10`, leaving `11` unused. Any corruption that produces `11` silently decodes to `Zero` via `bits_to_trit()`'s catch-all arm, masking data errors instead of detecting them.
+
+- **`multiply()` clamps results without warning**: `multiply()` clamps each element to {-1, 0, +1} after computing the integer product, silently discarding magnitude information. Two very different matrices can produce the same ternary product. Use `multiply_full()` when you need actual integer results.
+
+- **No sparse matrix support**: All operations iterate over every element regardless of sparsity. For large ternary matrices (which are often mostly zeros), this wastes computation. No CSR/CSC format is available.
+
 ## Ecosystem
 
 Part of the **SuperInstance** ternary computing crate family:
